@@ -75,6 +75,28 @@ The exact schema and fields are up to you - design what makes sense for the busi
 - The mock database in `data.py` is sufficient - no need for a real database
 - Focus on clean, production-quality code
 
+## Assumptions
+
+- **Each meeting involves exactly one user and one contact** (no multi-participant meetings)
+- You can use the mock data as-is - no need to create additional users or contacts
+- Meeting transcripts are provided as plain text (no audio processing needed)
+- Dates are in ISO 8601 format (e.g., "2025-11-20T14:00:00")
+
+## Expected Error Handling
+
+Your API should return appropriate HTTP status codes:
+
+### Success Codes
+- **200 OK** - Successful GET request or operation completed
+
+### Client Error Codes
+- **400 Bad Request** - Invalid request format, missing required fields, or validation errors
+- **404 Not Found** - Resource doesn't exist (meeting not found, user not found, etc.)
+
+### Server Error Codes
+- **500 Internal Server Error** - Unexpected errors (JSON parsing failures, etc.)
+- **503 Service Unavailable** - External service failures (LLM API down, all retries exhausted)
+
 ## Important Notes
 
 ⚠️ **The LLM client is unreliable** - it fails randomly. Your code needs to handle this gracefully. Read the `llm_client.py` file to understand how it behaves.
