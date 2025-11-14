@@ -31,11 +31,14 @@ You decide the endpoints, request/response formats, and error handling strategy.
 
 ## ⏱️ Time
 
-~60 minutes of implementation + discussion
+~75 minutes total
+ - 10 mins of discussion
+ - 55 mins of implementation
+ - 10 mins of questions
 
 ## 💡 Notes
 
-- Feel free to use AI coding assistants (ChatGPT, Claude, Copilot, etc.)
+- Feel free to use AI coding assistants (ChatGPT, Claude, Copilot, etc.) In fact encouraged
 - Ask questions if anything is unclear
 - The LLM is unreliable - handle failures gracefully
 - Focus on clean, production-quality code

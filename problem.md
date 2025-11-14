@@ -47,6 +47,27 @@ You have:
 - **`llm_client.py`**: A mock LLM client for generating insights (read the file to understand how to use it)
 - **`api.py`**: Starter Flask application (mostly empty - you'll build the endpoints)
 
+## Hints & Guidance
+
+### Data Structure
+- Look at `HISTORICAL_MEETINGS` in `data.py` to see what information past meetings contain - this can serve as inspiration for your meeting structure
+- Your API should work with **IDs** (like `user_id`, `contact_id`) rather than passing full user/contact objects
+- The helper functions in `data.py` (`get_user()`, `get_contact()`, `add_meeting()`, etc.) are available for you to use
+
+### Meeting Lifecycle
+- Think about what information you need when **creating** a meeting (before it happens)
+- vs. what gets **added later** after the meeting completes (transcript, insights, etc.)
+- Consider: Does a meeting need a transcript at creation time? Or is that added later?
+
+### Insights Structure
+When analyzing transcripts, you'll want to extract multiple types of insights. For example:
+- **Action items** might include: task description, owner, deadline, priority
+- **Sentiment** might include: a score, summary text, relationship health indicator
+- **Topics** might be a list of key themes discussed
+- **Follow-ups** might be recommended next steps
+
+The exact schema and fields are up to you - design what makes sense for the business requirements.
+
 ## Technical Constraints
 
 - Use Flask (already set up in `api.py`)
