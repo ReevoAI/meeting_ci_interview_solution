@@ -1,129 +1,358 @@
-# Meeting Intelligence Platform - Backend Engineer Interview
+# Meeting Intelligence Platform - Service Layer Interview
 
 ## Context
 
-You're building the backend for a meeting intelligence platform used by sales teams and customer success managers. The platform helps users:
+You're building the service layer for a meeting intelligence platform used by sales teams and customer success managers. The platform helps users:
 
-1. **Prepare for upcoming meetings** by surfacing relevant context from their past interactions
-2. **Extract insights from meeting transcripts** after meetings conclude
+1. **Manage their meetings** with internal and external contacts
+2. **Find available time slots** across multiple users
+3. **Prepare for meetings** by surfacing relevant context from past interactions
+4. **Handle failures gracefully** when external services are unreliable
 
-Think of products like Gong, Chorus, or Fireflies.ai - tools that help teams stay on top of their customer relationships through AI-powered analysis.
+Think of products like Gong, Chorus, or Fireflies.ai - but you'll be focusing on the core business logic rather than API endpoints.
 
-## Business Requirements
+---
 
-### Feature 1: Meeting Management
-Users need to track their meetings. They should be able to create meetings and associate them with contacts they're meeting with.
+## Interview Structure
 
-### Feature 2: Pre-Meeting Intelligence
-Before a meeting starts, users want to see:
-- Who they're meeting with
-- What they discussed previously
-- Suggested talking points
-- Any outstanding action items from past meetings
+This interview is divided into **5 progressive phases**. Each phase builds on the previous one:
 
-This context helps them prepare and be more effective in the conversation.
+1. **Phase 1:** Data Models (10 min) - Define Pydantic models
+2. **Phase 2:** CRUD Operations (15 min) - Implement basic database operations
+3. **Phase 3:** Availability Algorithm (20 min) - Find common free time slots
+4. **Phase 4:** Pre-Meeting Prep (10 min) - Generate meeting prep using LLM
+5. **Phase 5:** Error Handling (5 min) - Implement retry logic for failures
 
-### Feature 3: Post-Meeting Analysis
-After a meeting, users upload or paste the transcript. The system should extract useful insights like:
-- Action items and who's responsible
-- Key topics that were discussed
-- Overall sentiment and relationship health
-- Recommended follow-up actions
+**Total time: ~70 minutes**
 
-These insights get stored and can be referenced before future meetings.
-
-## What You're Building
-
-Design and implement a **REST API** that supports these features. You'll need to decide:
-- What endpoints to create
-- What the request/response formats should be
-- How to structure the data
-- How to generate the AI-powered insights
+---
 
 ## What's Provided
 
 You have:
-- **`data.py`**: Mock data with users, contacts, and historical meetings
-- **`llm_client.py`**: A mock LLM client for generating insights (read the file to understand how to use it)
-- **`api.py`**: Starter Flask application (mostly empty - you'll build the endpoints)
+- **`data.py`**: Mock database with users, contacts, and meetings
+- **`llm_client.py`**: Mock LLM client that randomly fails (read this!)
+- **`models.py`**: Partially complete Pydantic models (you'll finish these)
+- **`meeting_service.py`**: Service skeleton with detailed docstrings (you'll implement)
+- **Test files**: `test_phase1.py` through `test_phase5.py` + `test_all.py`
+- **`run_tests.py`**: Test runner to check your work
 
-## Hints & Guidance
+---
 
-### Data Structure
-- Look at `HISTORICAL_MEETINGS` in `data.py` to see what information past meetings contain - this can serve as inspiration for your meeting structure
-- Your API should work with **IDs** (like `user_id`, `contact_id`) rather than passing full user/contact objects
-- The helper functions in `data.py` (`get_user()`, `get_contact()`, `add_meeting()`, etc.) are available for you to use
+## How to Test Your Code
 
-### Meeting Lifecycle
-- Think about what information you need when **creating** a meeting (before it happens)
-- vs. what gets **added later** after the meeting completes (transcript, insights, etc.)
-- Consider: Does a meeting need a transcript at creation time? Or is that added later?
+Instead of using curl or Postman, you'll run tests:
 
-### Insights Structure
-When analyzing transcripts, you'll want to extract multiple types of insights. For example:
-- **Action items** might include: task description, owner, deadline, priority
-- **Sentiment** might include: a score, summary text, relationship health indicator
-- **Topics** might be a list of key themes discussed
-- **Follow-ups** might be recommended next steps
+```bash
+# Test each phase individually
+python run_tests.py phase1
+python run_tests.py phase2
+python run_tests.py phase3
 
-The exact schema and fields are up to you - design what makes sense for the business requirements.
+# Or test everything
+python run_tests.py all
+```
 
-## Technical Constraints
+Tests will tell you if your implementation is correct. ✅ = passing, ❌ = failing.
 
-- Use Flask (already set up in `api.py`)
-- Use the provided `MockLLMClient` for all AI/LLM operations
-- The mock database in `data.py` is sufficient - no need for a real database
-- Focus on clean, production-quality code
+---
 
-## Assumptions
+## Phase 1: Data Models (~10 min)
 
-- **Each meeting involves exactly one user and one contact** (no multi-participant meetings)
-- You can use the mock data as-is - no need to create additional users or contacts
-- Meeting transcripts are provided as plain text (no audio processing needed)
-- Dates are in ISO 8601 format (e.g., "2025-11-20T14:00:00")
+### Goal
+Complete the Pydantic models in `models.py`.
 
-## Expected Error Handling
+### Tasks
+1. Add missing fields to `User`, `Meeting` models
+2. Review all models and ensure they match requirements
 
-Your API should return appropriate HTTP status codes:
+### What to Consider
+- Which fields should be optional?
+- What types should each field be?
+- Do the models make sense for the business domain?
 
-### Success Codes
-- **200 OK** - Successful GET request or operation completed
+### Test
+```bash
+python run_tests.py phase1
+```
 
-### Client Error Codes
-- **400 Bad Request** - Invalid request format, missing required fields, or validation errors
-- **404 Not Found** - Resource doesn't exist (meeting not found, user not found, etc.)
+---
 
-### Server Error Codes
-- **500 Internal Server Error** - Unexpected errors (JSON parsing failures, etc.)
-- **503 Service Unavailable** - External service failures (LLM API down, all retries exhausted)
+## Phase 2: CRUD Operations (~15 min)
 
-## Important Notes
+### Goal
+Implement basic Create, Read, Update, Delete operations in `meeting_service.py`.
 
-⚠️ **The LLM client is unreliable** - it fails randomly. Your code needs to handle this gracefully. Read the `llm_client.py` file to understand how it behaves.
+### Functions to Implement
+- `get_all_meetings(user_id, filters)` - Get all meetings for a user
+- `get_meeting(meeting_id)` - Get specific meeting
+- `create_meeting(meeting_request)` - Create new meeting
+- `update_meeting(meeting_id, updates)` - Update meeting fields
+- `delete_meeting(meeting_id)` - Delete a meeting
 
-⚠️ **Ask questions** - The requirements are intentionally open-ended. If you're unsure about something, ask the interviewer. Part of this exercise is understanding product requirements.
+### Process
+1. **Design discussion** - Explain your approach to the interviewer
+2. **Edge cases** - What could go wrong? How will you handle it?
+3. **Implementation** - Write the code (you can use AI assistance after design approval)
+
+### Key Edge Cases
+- Invalid user/contact IDs
+- Updating non-existent meetings
+- Creating internal meetings (no contact)
+- Empty filters
+
+### Test
+```bash
+python run_tests.py phase2
+```
+
+---
+
+## Phase 3: Availability Algorithm (~20 min)
+
+### Goal
+Implement `find_available_slots()` to find times when all users are free.
+
+### Function Signature
+```python
+def find_available_slots(
+    user_ids: List[str],
+    date: str,  # YYYY-MM-DD
+    duration_minutes: int,
+    work_hours: tuple = (9, 17)
+) -> List[TimeSlot]:
+```
+
+### Algorithm Design
+1. Get all meetings for all users on that date
+2. Convert meetings to busy time intervals
+3. Merge overlapping busy intervals
+4. Find gaps >= duration_minutes
+5. Filter gaps to work_hours only
+6. Return as TimeSlot objects
+
+### Process
+1. **Whiteboard/pseudocode** - Explain your algorithm
+2. **Discuss edge cases** - Empty user list? No meetings? Fully booked?
+3. **Implement** - Write the code
+4. **Test and debug** - Run tests and fix issues
+
+### Key Challenges
+- Time parsing and comparison
+- Interval merging algorithm
+- Handling overlaps and gaps
+- Boundary conditions
+
+### Test
+```bash
+python run_tests.py phase3
+```
+
+---
+
+## Phase 4: Pre-Meeting Prep (~10 min)
+
+### Goal
+Implement `generate_pre_meeting_prep()` to create meeting preparation using LLM.
+
+### Function Purpose
+Generate helpful context before a meeting with an external contact by:
+1. Fetching historical meetings with that contact
+2. Building a prompt for the LLM
+3. Getting prep materials from LLM
+4. Returning structured prep
+
+### What to Generate
+- Contact summary
+- Recent interaction highlights
+- Suggested talking points (3-5 items)
+- Pending action items from past meetings
+
+### Prompt Design
+You'll need to craft a prompt that asks the LLM for structured output. Example structure:
+
+```
+You are preparing someone for a meeting.
+
+Contact: {name} - {role} at {company}
+
+Past meetings:
+- {date}: {summary}
+- {date}: {summary}
+
+Provide:
+1. Contact summary (2-3 sentences)
+2. Recent interaction highlights
+3. 3-5 suggested talking points
+4. Pending action items
+
+Return as JSON: {"contact_summary": "...", ...}
+```
+
+### Edge Cases
+- First meeting with contact (no history)
+- Internal meeting (no contact_id) - should raise ValueError
+- LLM returns malformed JSON
+
+### Test
+```bash
+python run_tests.py phase4
+```
+
+---
+
+## Phase 5: Error Handling (~5 min)
+
+### Goal
+Implement `generate_pre_meeting_prep_with_retry()` with retry logic.
+
+### Why This Matters
+⚠️ **The LLM client randomly fails!** It has a ~30% failure rate. Your code must handle this gracefully.
+
+### Retry Strategy
+- Try up to `max_retries` times (default 3)
+- Use exponential backoff: 0.1s, 0.2s, 0.4s, etc.
+- If all retries fail, raise `LLMAPIError`
+- If meeting doesn't exist, raise `ValueError` (don't retry)
+
+### Implementation Hints
+```python
+for attempt in range(max_retries):
+    try:
+        return generate_pre_meeting_prep(meeting_id)
+    except LLMAPIError as e:
+        if attempt == max_retries - 1:
+            raise
+        wait_time = 0.1 * (2 ** attempt)  # Exponential backoff
+        time.sleep(wait_time)
+```
+
+### Discussion Points
+- Why exponential backoff vs fixed delay?
+- Should we have a max backoff time?
+- Alternative: return partial results on failure?
+- Circuit breaker pattern?
+
+### Test
+```bash
+python run_tests.py phase5
+```
+
+---
+
+## General Guidelines
+
+### Use AI Assistance
+You're encouraged to use AI tools (ChatGPT, Claude, Copilot) for implementation. We want to see how you work in a real environment.
+
+**However:** Design and algorithm discussions should be yours. Don't just ask AI "implement this function" without understanding the approach first.
+
+### Ask Questions
+Requirements are intentionally somewhat open-ended. If something is unclear, ask! Real engineering involves clarifying requirements.
+
+### Code Quality Matters
+- Write clean, readable code
+- Add comments where helpful
+- Use meaningful variable names
+- Handle errors appropriately
+
+### Focus on Business Logic
+This interview emphasizes:
+- Algorithm design
+- Data modeling
+- Error handling
+- Critical thinking
+
+Not testing:
+- Flask/API knowledge
+- HTTP status codes
+- Tool setup
+
+---
+
+## Data Structure Reference
+
+### Available in data.py
+
+**Users:**
+```python
+USERS = {
+    "user_1": {
+        "id": "user_1",
+        "name": "Sarah Chen",
+        "email": "sarah.chen@company.com",
+        "role": "Account Executive"
+    },
+    # ...
+}
+```
+
+**Contacts:**
+```python
+CONTACTS = {
+    "contact_1": {
+        "id": "contact_1",
+        "name": "Jennifer Liu",
+        "email": "jennifer.liu@acmecorp.com",
+        "company": "Acme Corp",
+        "role": "VP of Engineering"
+    },
+    # ...
+}
+```
+
+**Meetings:**
+```python
+MEETINGS = {
+    "hist_meeting_1": {
+        "id": "hist_meeting_1",
+        "user_id": "user_1",
+        "contact_id": "contact_1",
+        "title": "Product Demo",
+        "date": "2025-07-10T14:00:00",
+        "summary": "...",
+        "action_items": [...],
+        "sentiment": "positive"
+    },
+    # ...
+}
+```
+
+### Helper Functions Available
+
+```python
+data.get_user(user_id)
+data.get_contact(contact_id)
+data.get_meeting(meeting_id)
+data.get_historical_meetings_for_contact(contact_id, limit)
+data.add_meeting(meeting_data)
+data.update_meeting(meeting_id, updates)
+data.user_exists(user_id)
+data.contact_exists(contact_id)
+data.meeting_exists(meeting_id)
+```
+
+---
 
 ## Success Criteria
 
-Your solution will be evaluated on:
-- **API design**: Are your endpoints well-designed and RESTful?
-- **Code quality**: Is your code clean, readable, and well-structured?
-- **Error handling**: Does your code handle failures gracefully?
-- **Completeness**: Does it solve the stated business problems?
-- **Decision-making**: Can you justify your design choices?
+You'll be evaluated on:
 
-## Time Expectation
+1. **Algorithm Design** - Can you design efficient, correct algorithms?
+2. **Code Quality** - Is your code clean and well-structured?
+3. **Error Handling** - Do you handle edge cases and failures gracefully?
+4. **Communication** - Can you explain your approach and trade-offs?
+5. **Testing Mindset** - Do you think about what could go wrong?
+6. **Completeness** - Did you implement all required functions?
 
-You have approximately **60 minutes** for implementation, followed by a discussion about your approach and how you'd evolve this for production.
+---
 
 ## Getting Started
 
-1. Read through the provided files to understand what's available
-2. Ask any clarifying questions
-3. Design your API (you might want to sketch this out first)
-4. Implement your endpoints
-5. Test your implementation
+1. **Read the files** - Understand what's provided
+2. **Ask questions** - Clarify anything unclear
+3. **Start with Phase 1** - Complete models
+4. **Progress through phases** - Test each phase before moving on
+5. **Discuss your approach** - Explain your thinking as you go
 
-You can use AI coding assistants (ChatGPT, Claude, Copilot, etc.) to help you code. We want to see how you work in a real development environment.
-
-Good luck!
+Good luck! 🚀
