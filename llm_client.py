@@ -117,23 +117,26 @@ class MockLLMClient:
         contact_match = re.search(r"contact[:\s]+([A-Z][a-z]+ [A-Z][a-z]+)", prompt)
         contact_name = contact_match.group(1) if contact_match else "the contact"
 
-        context = {
-            "contact_summary": f"You have an established relationship with {contact_name}, having met multiple times over the past few months. They are engaged and responsive, showing strong interest in your solution.",
-            "recent_interactions": "Your last meeting covered technical requirements and implementation timelines. The contact expressed enthusiasm about key features and mentioned they're in the decision-making phase with executive approval pending.",
-            "suggested_topics": [
-                "Follow up on action items from last meeting",
-                "Discuss implementation timeline and milestones",
-                "Address any remaining concerns or blockers",
-                "Clarify next steps in the evaluation process"
-            ],
-            "pending_action_items": [
-                "Review provided technical documentation",
-                "Schedule meeting with decision makers",
-                "Finalize contract terms and pricing"
-            ]
-        }
+        prep_text = f"""MEETING PREPARATION
 
-        return json.dumps(context, indent=2)
+CONTACT: {contact_name}
+You have an established relationship with {contact_name}, having met multiple times over the past few months. They are engaged and responsive, showing strong interest in your solution.
+
+RECENT INTERACTIONS:
+Your last meeting covered technical requirements and implementation timelines. The contact expressed enthusiasm about key features and mentioned they're in the decision-making phase with executive approval pending.
+
+SUGGESTED TALKING POINTS:
+• Follow up on action items from last meeting
+• Discuss implementation timeline and milestones
+• Address any remaining concerns or blockers
+• Clarify next steps in the evaluation process
+
+PENDING ACTION ITEMS:
+• Review provided technical documentation
+• Schedule meeting with decision makers
+• Finalize contract terms and pricing"""
+
+        return prep_text
 
     def _generate_action_items(self, prompt: str) -> str:
         """Generate action items from transcript"""
