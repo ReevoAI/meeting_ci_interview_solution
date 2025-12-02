@@ -15,18 +15,18 @@ This repository contains:
 ### 1. Install Dependencies
 
 ```bash
-pip install -r requirements.txt
+uv sync
 ```
 
 ### 2. Run Tests
 
 ```bash
 # Test individual phases
-python run_tests.py phase1
-python run_tests.py phase2
+uv run python run_tests.py phase1
+uv run python run_tests.py phase2
 
 # Test all phases
-python run_tests.py all
+uv run python run_tests.py all
 ```
 
 All tests should pass ✅
@@ -47,7 +47,7 @@ meeting_ci_question_solution/
 ├── README.md                 # This file
 ├── INTERVIEWER_GUIDE.md      # Interview guide for you
 ├── problem.md                # Same as candidate sees
-├── requirements.txt          # Python dependencies
+├── pyproject.toml            # Python dependencies
 ├── data.py                   # Mock database
 ├── llm_client.py            # Mock LLM client
 ├── models.py                # ✅ Complete models
@@ -106,7 +106,7 @@ meeting_ci_question_solution/
 
 All tests pass:
 ```bash
-python run_tests.py all
+uv run python run_tests.py all
 ```
 
 Expected output: ✅ ALL PHASES PASSED

@@ -45,12 +45,12 @@ Instead of using curl or Postman, you'll run tests:
 
 ```bash
 # Test each phase individually
-python run_tests.py phase1
-python run_tests.py phase2
-python run_tests.py phase3
+uv run python run_tests.py phase1
+uv run python run_tests.py phase2
+uv run python run_tests.py phase3
 
 # Or test everything
-python run_tests.py all
+uv run python run_tests.py all
 ```
 
 Tests will tell you if your implementation is correct. ✅ = passing, ❌ = failing.
@@ -73,7 +73,7 @@ Complete the Pydantic models in `models.py`.
 
 ### Test
 ```bash
-python run_tests.py phase1
+uv run python run_tests.py phase1
 ```
 
 ---
@@ -103,7 +103,7 @@ Implement basic Create, Read, Update, Delete operations in `meeting_service.py`.
 
 ### Test
 ```bash
-python run_tests.py phase2
+uv run python run_tests.py phase2
 ```
 
 ---
@@ -145,7 +145,7 @@ def find_available_slots(
 
 ### Test
 ```bash
-python run_tests.py phase3
+uv run python run_tests.py phase3
 ```
 
 ---
@@ -196,7 +196,7 @@ Return as JSON: {"contact_summary": "...", ...}
 
 ### Test
 ```bash
-python run_tests.py phase4
+uv run python run_tests.py phase4
 ```
 
 ---
@@ -235,7 +235,7 @@ for attempt in range(max_retries):
 
 ### Test
 ```bash
-python run_tests.py phase5
+uv run python run_tests.py phase5
 ```
 
 ---
